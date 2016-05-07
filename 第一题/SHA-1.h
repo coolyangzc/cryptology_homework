@@ -42,7 +42,7 @@ namespace SHA_1
             return Parity(x, y, z);
     }
 
-    uint32_t* SHA1(const bool * msg, uint64_t size)
+    uint32_t* SHA1(const bool * msg, uint64_t size, bool print = false)
     {
 
         uint64_t N = (size / 512) + 1;
@@ -58,6 +58,15 @@ namespace SHA_1
 
         for(uint64_t i = 0; i < N; i++)
         {
+
+            if (print)
+            {
+                std::cout << "Step " << i << ": ";
+                for(uint32_t j = 0; j < 5; j++)
+                    std::cout << std::hex << H[j];
+                std::cout << std::endl;
+            }
+
             //Prepare the message schedule
             for(uint32_t t = 0; t < 16; t++)
             {
@@ -106,7 +115,7 @@ namespace SHA_1
         return H;
     }
 
-    uint32_t* SHA1(const char * msg)
+    uint32_t* SHA1(const char * msg, bool print = false)
     {
         uint32_t len = strlen(msg);
         uint32_t size = len * 8;
@@ -115,7 +124,7 @@ namespace SHA_1
         for(uint64_t i = 0; i < len; i++)
             for(uint32_t j = 0; j < 8; j++)
                 msg_bool[p++] = (msg[i] >> (7-j)) & 1;
-        uint32_t* res = SHA1(msg_bool, size);
+        uint32_t* res = SHA1(msg_bool, size, print);
         delete[] msg_bool;
         return res;
     }
