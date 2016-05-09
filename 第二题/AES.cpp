@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <cstdio>
 
 using namespace std;
 const int ROUNDS_PLUS = 11;
@@ -57,12 +58,24 @@ uint8_t global_plaintext[] = {
     0x31,0x31,0x98,0xA2,
     0xE0,0x37,0x07,0x34};
     
+uint8_t R[10][4] = {{0x01, 0x00, 0x00, 0x00},
+                    {0x02, 0x00, 0x00, 0x00},
+                    {0x04, 0x00, 0x00, 0x00},
+                    {0x08, 0x00, 0x00, 0x00},
+                    {0x10, 0x00, 0x00, 0x00},
+                    {0x20, 0x00, 0x00, 0x00},
+                    {0x40, 0x00, 0x00, 0x00},
+                    {0x80, 0x00, 0x00, 0x00},
+                    {0x1B, 0x00, 0x00, 0x00},
+                    {0x36, 0x00, 0x00, 0x00}};
     
 class AES_maker
 {
+public:
     uint8_t *key;
     uint8_t *plaintext;
-    uint8_t expand_key[ROUNDS_PLUS][16];
+    uint8_t expand_key[ROUNDS_PLUS][4][4];
+    uint8_t tmp[4];
     
     AES_maker()
     {
@@ -70,13 +83,75 @@ class AES_maker
         plaintext = global_plaintext;
     }
     
+    void rot_word(uint8_t w[4]) 
+    {
+        uint8_t tmp;
+        tmp = w[0];
+        for (int i = 0; i < 3; i++) 
+        {
+            w[i] = w[i+1];
+        }
+        w[3] = tmp;
+    }
+    
+    void sub_word(uint8_t w[4]) 
+    {
+        for (int i = 0; i < 4; i++) {
+            w[i] = s_box[16*((w[i] & 0xf0) >> 4) + (w[i] & 0x0f)];
+        }
+    }
+    
+    void coef_add(uint8_t a[4], uint8_t b[4], uint8_t d[4]) 
+    {
+        d[0] = a[0]^b[0];
+        d[1] = a[1]^b[1];
+        d[2] = a[2]^b[2];
+        d[3] = a[3]^b[3];
+    }
+    
     void expand()
     {
-        
+        for(int i=0;i<4;i++)
+            for(int j=0;j<4;j++)
+        {
+            expand_key[0][i][j] = key[4*i+j];
+        }
+        for(int i=1;i<ROUNDS_PLUS;i++)
+        {
+            for(int j=0;j<4;j++)
+            {
+                for(int k=0;k<4;k++)
+                {
+                    tmp[k] = expand_key[i][j-1][k];
+                }
+                if(j == 0)
+                {
+                    rot_word(tmp);
+                    sub_word(tmp);
+                    coef_add(tmp, R[i-1], tmp);
+                }
+                for(int k=0;k<4;k++)
+                {
+                    expand_key[i][j][k] = expand_key[i-1][j][k] ^ tmp[k];
+                }
+            }
+        }
     }
-};
+}aes;
     
 int main()
 {
+    aes.expand();
+    for(int i=0;i<ROUNDS_PLUS;i++)
+    {
+        for(int j=0;j<4;j++)
+        {
+            for(int k=0;k<4;k++)
+            {
+                printf("%x ", aes.expand_key[i][j][k]);
+            }
+        }
+        printf("\n");
+    }
     return 0;
 }
