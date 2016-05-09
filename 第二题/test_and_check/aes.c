@@ -539,6 +539,15 @@ int main(int argc, char *argv[]) {
 	w = malloc(Nb*(Nr+1)*4);
 
 	key_expansion(key, w);
+    
+    printf("expand:\n");
+    
+    for (i = 0; i < Nb*(Nr+1); i++) {
+		printf("%x %x %x %x ", w[4*i+0], w[4*i+1], w[4*i+2], w[4*i+3]);
+        if(i%Nb == 3) printf("\n");
+	}
+    
+    printf("\n");
 
 	cipher(in /* in */, out /* out */, w /* expanded key */);
 
