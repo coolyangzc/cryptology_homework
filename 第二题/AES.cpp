@@ -73,25 +73,31 @@ class AES_maker
 {
 public:
     uint8_t *key;
-    uint8_t *plaintext;
     uint8_t expand_key[ROUNDS_PLUS][4][4];
     uint8_t tmp[4];
+    
+    uint8_t *plaintext;
+    uint8_t *cryptotext;
+    uint8_t state[4][4];
     
     AES_maker()
     {
         key = global_key;
         plaintext = global_plaintext;
+        cryptotext = new uint8_t[16];
     }
+    
+    //expand and using function
     
     void rot_word(uint8_t w[4]) 
     {
-        uint8_t tmp;
-        tmp = w[0];
+        uint8_t temp;
+        temp = w[0];
         for (int i = 0; i < 3; i++) 
         {
             w[i] = w[i+1];
         }
-        w[3] = tmp;
+        w[3] = temp;
     }
     
     void sub_word(uint8_t w[4]) 
@@ -137,11 +143,130 @@ public:
             }
         }
     }
+    
+    //making crypto
+    void add_round_key(int r)
+    {
+        for (int c = 0; c < 4; c++)
+            for (int k = 0; k < 4; k++)
+            {
+                state[k][c] = state[k][c]^expand_key[r][c][k];
+            }
+    }
+    
+    void sub_bytes() 
+    {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                uint8_t row = (state[i][j] & 0xf0) >> 4;
+                uint8_t col = state[i][j] & 0x0f;
+                state[i][j] = s_box[16*row+col];
+            }
+        }
+    }
+    
+    void shift_rows() 
+    {
+        for (int i = 0; i < 4; i++) {
+            int s = 0;
+            while (s < i) {
+                uint8_t temp = state[i][0];
+                for (int k = 1; k < 4; k++) {
+                    state[i][k-1] = state[i][k];
+                }
+                state[i][3] = temp;
+                s++;
+            }
+        }
+    }
+    
+    uint8_t gmult(uint8_t a, uint8_t b) 
+    {
+        uint8_t p = 0, hbs = 0;
+        for (int i = 0; i < 8; i++) {
+            if (b & 1) {
+                p ^= a;
+            }
+
+            hbs = a & 0x80;
+            a <<= 1;
+            if (hbs) a ^= 0x1b; // 0000 0001 0001 1011	
+            b >>= 1;
+        }
+        return (uint8_t)p;
+    }
+    
+    void coef_mult(uint8_t *a, uint8_t *b, uint8_t *d) 
+    {
+        d[0] = gmult(a[0],b[0])^gmult(a[3],b[1])^gmult(a[2],b[2])^gmult(a[1],b[3]);
+        d[1] = gmult(a[1],b[0])^gmult(a[0],b[1])^gmult(a[3],b[2])^gmult(a[2],b[3]);
+        d[2] = gmult(a[2],b[0])^gmult(a[1],b[1])^gmult(a[0],b[2])^gmult(a[3],b[3]);
+        d[3] = gmult(a[3],b[0])^gmult(a[2],b[1])^gmult(a[1],b[2])^gmult(a[0],b[3]);
+    }
+    
+    void mix_columns() 
+    {
+        uint8_t a[] = {0x02, 0x01, 0x01, 0x03}; // a(x) = {02} + {01}x + {01}x2 + {03}x3
+        uint8_t col[4], res[4];
+        for (int j = 0; j < 4; j++) 
+        {
+            for (int i = 0; i < 4; i++) 
+            {
+                col[i] = state[i][j];
+            }
+            coef_mult(a, col, res);
+            for (int i = 0; i < 4; i++) 
+            {
+                state[i][j] = res[i];
+            }
+        }
+    }
+    
+    void print_state()
+    {
+        for(int i=0;i<4;i++)
+            for(int j=0;j<4;j++)
+            {
+                printf("%x ", state[i][j]);
+            }
+        printf("\n");
+    }
+    
+    void cipher() 
+    {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                state[i][j] = plaintext[i+4*j];
+                printf("%x ", state[i][j]);
+            }
+        }
+        
+        printf("\n\n");
+
+        add_round_key(0);
+        print_state();
+        for (int r = 1; r < ROUNDS_PLUS; r++) {
+            sub_bytes();
+            shift_rows();
+            if(r != (ROUNDS_PLUS - 1)) mix_columns();
+            add_round_key(r);
+            print_state();
+        }
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                cryptotext[i+4*j] = state[i][j];
+            }
+        }
+    }
+    
 }aes;
     
 int main()
 {
     aes.expand();
+    aes.cipher();
+    printf("\n");
     for(int i=0;i<ROUNDS_PLUS;i++)
     {
         for(int j=0;j<4;j++)

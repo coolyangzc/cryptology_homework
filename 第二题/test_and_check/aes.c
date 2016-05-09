@@ -382,6 +382,14 @@ void key_expansion(uint8_t *key, uint8_t *w) {
 	}
 }
 
+void print_state(uint8_t state[])
+{
+    int i;
+    for(i=0;i<4*Nb;i++)
+        printf("%x ", state[i]);
+    printf("\n");
+}
+
 void cipher(uint8_t *in, uint8_t *out, uint8_t *w) {
 
 	uint8_t state[4*Nb];
@@ -393,18 +401,23 @@ void cipher(uint8_t *in, uint8_t *out, uint8_t *w) {
 		}
 	}
 
+    print_state(state);
 	add_round_key(state, w, 0);
+    printf("state:\n");
+    print_state(state);
 
 	for (r = 1; r < Nr; r++) {
 		sub_bytes(state);
 		shift_rows(state);
 		mix_columns(state);
 		add_round_key(state, w, r);
+        print_state(state);
 	}
 
 	sub_bytes(state);
 	shift_rows(state);
 	add_round_key(state, w, Nr);
+    print_state(state);
 
 	for (i = 0; i < 4; i++) {
 		for (j = 0; j < Nb; j++) {
