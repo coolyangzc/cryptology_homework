@@ -1,0 +1,15 @@
+crypto:
+d4 48 fc e8 15 63 3a d1 b4 3a 7a e2 48 9a 2a 69
+
+expand key:
+3a e1 15 62 a8 f3 c7 1a 2b f6 df a1 50 9b ca f1
+2f 95 b4 31 87 66 73 2b ac 90 ac 8a fc b 66 7b
+6 a6 95 81 81 c0 e6 aa 2d 50 4a 20 d1 5b 2c 5b
+3b d7 ac bf ba 17 4a 15 97 47 0 35 46 1c 2c 6e
+af a6 33 e5 15 b1 79 f0 82 f6 79 c5 c4 ea 55 ab
+38 5a 51 f9 2d eb 28 9 af 1d 51 cc 6b f7 4 67
+70 a8 d4 86 5d 43 fc 8f f2 5e ad 43 99 a9 a9 24
+e3 7b e2 68 be 38 1e e7 4c 66 b3 a4 d5 cf 1a 80
+e9 d9 2f 6b 57 e1 31 8c 1b 87 82 28 ce 48 98 a8
+a0 9f ed e0 f7 7e dc 6c ec f9 5e 44 22 b1 c6 ec
+5e 2b 23 73 a9 55 ff 1f 45 ac a1 5b 67 1d 67 b7

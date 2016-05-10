@@ -227,7 +227,7 @@ public:
         for(int i=0;i<4;i++)
             for(int j=0;j<4;j++)
             {
-                printf("%x ", state[i][j]);
+                printf("%x ", state[j][i]);
             }
         printf("\n");
     }
