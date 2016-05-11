@@ -12,7 +12,11 @@ int main()
 {
     GMAC_maker gmac;
     gmac.IV_to_Y(test_iv);
-    //gmac.encrypt("yezipeng2013011404");
-    gmac.encrypt_null().print_data();
+    gmac.encrypt("qiandichen2013011402");
+    //gmac.encrypt_null().print_data();
+    
+    /*uint128_t a;
+    a.set_len(18);
+    a.rightshift();*/
     return 0;
 }

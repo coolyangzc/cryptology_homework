@@ -22,6 +22,16 @@ bool getBit(uint8_t* data,int n)
     bool temp = data[q]&for_getBit[r];
     return temp;
 }
+
+bool getBit(string data,int n)
+{
+    int q,r;
+    q = n/8;
+    r = n - 8*q;
+    if(q >= data.size()) return 0;
+    bool temp = data[q]&for_getBit[r];
+    return temp;
+}
     
     
 class uint128_t
@@ -35,23 +45,33 @@ public:
         for(int i=0;i<128;i++)
             data[i] = getBit(x,i);
     }
+    
+    uint128_t(string s)
+    {
+        for(int i=0;i<128;i++)
+            data[i] = getBit(s,i);
+    }
+    
     //method
     bool operator [](int n)
     {
         return data[n];
     }
+    
     uint128_t rightshift()
     {
         uint128_t res;
-        res.data = data>>1;
+        res.data = data<<1;
         return res;
     }
+    
     uint128_t operator ^(uint128_t &x)
     {
         uint128_t res;
         res.data = data^x.data;
         return res;
     }
+    
     uint128_t operator *(uint128_t &y)//this * y
     {
         uint128_t z, v(*this);
@@ -70,6 +90,7 @@ public:
         }
         return z;
     }
+    
     //print
     void print_data()
     {
@@ -80,11 +101,16 @@ public:
         }
         cout<<endl;
     }
+    
     //for GHASH
     void set_len(int len)
     {
-        data = len;
-        data = data<<64;
+        bitset<128> inverse = len;
+        for(int i=0;i<128;i++)
+            data[i] = inverse[127-i];
+        print_data();
+        data = data>>64;
+        cout<<"len A|len C :"<<endl;
         print_data();
     }
 };
@@ -117,18 +143,30 @@ public:
     
     uint128_t GHASH()
     {
+        cout<<"temp128 :"<<endl;
+        for(int i=0;i<workspace.size();i++)
+        {
+            workspace[i].print_data();
+        }
         uint128_t res;
         if(workspace.size() == 0)
         {
             res = res*H;
         }
-        if(workspace.size() == 1)
+        else
         {
-            res = workspace[0]*H;
+            for(int i=0;i<workspace.size();i++)
+            {
+                res = (res^workspace[i])*H;
+                cout<<"middle"<<i<<" :"<<endl;
+                res.print_data();
+            }
             uint128_t len_link;
             len_link.set_len(A_len);
             res = (res^len_link)*H;
         }
+        cout<<"res :"<<endl;
+        res.print_data();
         return res;
     }
     //main
@@ -138,23 +176,27 @@ public:
         uint128_t HH(aes.cipher(zero_plaintext));//ab a3 1e 4e cb 74 1b f0 ce 52 1d bf 7e 2d 77 f7
         H = HH;
         uint128_t E(aes.cipher(Y));
+        cout<<"H=\n";
         H.print_data();
+        cout<<"E=\n";
         E.print_data();
         return GHASH()^E;
     }
+    
     uint128_t encrypt(string s)
     {
         int len = s.size();
         A_len = 8*len;
-        return encrypt();
-    }
-    uint128_t encrypt(uint128_t input)
-    {
         workspace.clear();
-        workspace.push_back(input);
-        A_len = 128;
+        for(int i=0;i<len;i+=16)
+        {
+            string sub = s.substr(i,16);
+            uint128_t temp128(sub);
+            workspace.push_back(temp128);
+        }
         return encrypt();
     }
+    
     uint128_t encrypt_null()
     {
         workspace.clear();
