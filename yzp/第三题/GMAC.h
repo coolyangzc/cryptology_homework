@@ -1,5 +1,6 @@
 #include "AES.h"
 #include <bitset>
+#include <vector>
 using namespace std;
 
 uint8_t zero_plaintext[] = {
@@ -79,6 +80,13 @@ public:
         }
         cout<<endl;
     }
+    //for GHASH
+    void set_len(int len)
+    {
+        data = len;
+        data = data<<64;
+        print_data();
+    }
 };
 
 void print_state(uint8_t* state)
@@ -95,25 +103,62 @@ class GMAC_maker
 {
 public:
     AES_maker aes;
-    string str;
     uint128_t H;
     uint8_t Y[16];
     
-    //main
-    bitset<128> getA()
-    {
-        bitset<128> A;
-        return A;
-    }
+    int A_len;
+    vector<uint128_t > workspace;
+    
     void IV_to_Y(uint8_t* IV)
     {
         for(int i=0;i<16;i++) 
             Y[i] = IV[i];
     }
-    void encrypt()
+    
+    uint128_t GHASH()
+    {
+        uint128_t res;
+        if(workspace.size() == 0)
+        {
+            res = res*H;
+        }
+        if(workspace.size() == 1)
+        {
+            res = workspace[0]*H;
+            uint128_t len_link;
+            len_link.set_len(A_len);
+            res = (res^len_link)*H;
+        }
+        return res;
+    }
+    //main
+    uint128_t encrypt()
     {
         aes.expand();
         uint128_t HH(aes.cipher(zero_plaintext));//ab a3 1e 4e cb 74 1b f0 ce 52 1d bf 7e 2d 77 f7
         H = HH;
+        uint128_t E(aes.cipher(Y));
+        H.print_data();
+        E.print_data();
+        return GHASH()^E;
+    }
+    uint128_t encrypt(string s)
+    {
+        int len = s.size();
+        A_len = 8*len;
+        return encrypt();
+    }
+    uint128_t encrypt(uint128_t input)
+    {
+        workspace.clear();
+        workspace.push_back(input);
+        A_len = 128;
+        return encrypt();
+    }
+    uint128_t encrypt_null()
+    {
+        workspace.clear();
+        A_len = 0;
+        return encrypt();
     }
 };
