@@ -15,14 +15,14 @@ uint8_t test_plaintext[] = {
     
     
 void print_state(uint8_t* state)
-    {
-        for(int i=0;i<4;i++)
-            for(int j=0;j<4;j++)
-            {
-                printf("%x ", state[4*i+j]);
-            }
-        printf("\n");
-    }
+{
+    for(int i=0;i<4;i++)
+        for(int j=0;j<4;j++)
+        {
+            printf("%x ", state[4*i+j]);
+        }
+    printf("\n");
+}
 
 int main()
 {
