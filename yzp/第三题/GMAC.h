@@ -72,14 +72,48 @@ public:
     //print
     void print_data()
     {
-        cout<<data<<endl;
-        printf("\n");
+        for(int i=0;i<128;i++)
+        {
+            cout << data[i];
+            if(i%4 == 3) cout<<" ";
+        }
+        cout<<endl;
     }
 };
+
+void print_state(uint8_t* state)
+{
+    for(int i=0;i<4;i++)
+        for(int j=0;j<4;j++)
+        {
+            printf("%x ", state[4*i+j]);
+        }
+    printf("\n");
+}
     
 class GMAC_maker
 {
 public:
     AES_maker aes;
+    string str;
     uint128_t H;
+    uint8_t Y[16];
+    
+    //main
+    bitset<128> getA()
+    {
+        bitset<128> A;
+        return A;
+    }
+    void IV_to_Y(uint8_t* IV)
+    {
+        for(int i=0;i<16;i++) 
+            Y[i] = IV[i];
+    }
+    void encrypt()
+    {
+        aes.expand();
+        uint128_t HH(aes.cipher(zero_plaintext));//ab a3 1e 4e cb 74 1b f0 ce 52 1d bf 7e 2d 77 f7
+        H = HH;
+    }
 };
