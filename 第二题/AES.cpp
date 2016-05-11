@@ -102,7 +102,8 @@ public:
     
     void sub_word(uint8_t w[4]) 
     {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++) 
+        {
             w[i] = s_box[16*((w[i] & 0xf0) >> 4) + (w[i] & 0x0f)];
         }
     }
@@ -119,9 +120,9 @@ public:
     {
         for(int i=0;i<4;i++)
             for(int j=0;j<4;j++)
-        {
-            expand_key[0][i][j] = key[4*i+j];
-        }
+            {
+                expand_key[0][i][j] = key[4*i+j];
+            }
         for(int i=1;i<ROUNDS_PLUS;i++)
         {
             for(int j=0;j<4;j++)
@@ -156,8 +157,10 @@ public:
     
     void sub_bytes() 
     {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
+        for (int i = 0; i < 4; i++) 
+        {
+            for (int j = 0; j < 4; j++) 
+            {
                 uint8_t row = (state[i][j] & 0xf0) >> 4;
                 uint8_t col = state[i][j] & 0x0f;
                 state[i][j] = s_box[16*row+col];
@@ -167,11 +170,14 @@ public:
     
     void shift_rows() 
     {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++) 
+        {
             int s = 0;
-            while (s < i) {
+            while (s < i) 
+            {
                 uint8_t temp = state[i][0];
-                for (int k = 1; k < 4; k++) {
+                for (int k = 1; k < 4; k++) 
+                {
                     state[i][k-1] = state[i][k];
                 }
                 state[i][3] = temp;
@@ -183,8 +189,10 @@ public:
     uint8_t gmult(uint8_t a, uint8_t b) 
     {
         uint8_t p = 0, hbs = 0;
-        for (int i = 0; i < 8; i++) {
-            if (b & 1) {
+        for (int i = 0; i < 8; i++) 
+        {
+            if (b & 1) 
+            {
                 p ^= a;
             }
 
@@ -234,8 +242,10 @@ public:
     
     void cipher() 
     {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
+        for (int i = 0; i < 4; i++) 
+        {
+            for (int j = 0; j < 4; j++) 
+            {
                 state[i][j] = plaintext[i+4*j];
                 printf("%x ", state[i][j]);
             }
@@ -245,7 +255,8 @@ public:
 
         add_round_key(0);
         print_state();
-        for (int r = 1; r < ROUNDS_PLUS; r++) {
+        for (int r = 1; r < ROUNDS_PLUS; r++) 
+        {
             sub_bytes();
             shift_rows();
             if(r != (ROUNDS_PLUS - 1)) mix_columns();
@@ -253,8 +264,10 @@ public:
             print_state();
         }
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
+        for (int i = 0; i < 4; i++) 
+        {
+            for (int j = 0; j < 4; j++) 
+            {
                 cryptotext[i+4*j] = state[i][j];
             }
         }
