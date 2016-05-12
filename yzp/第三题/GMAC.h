@@ -96,10 +96,19 @@ public:
     //print
     void print_data()
     {
+        int temp = 0;
         for(int i=0;i<128;i++)
         {
-            cout << data[i];
-            if(i%4 == 3) cout<<" ";
+            temp = temp*2 + int(data[i]);
+            if(i%4 == 3) 
+            {
+                cout<<hex<<temp;
+                temp = 0;
+            }
+            if(i%8 == 7) 
+            {
+                cout<<" ";
+            }
         }
         cout<<endl;
     }
@@ -212,7 +221,7 @@ public:
         C_len = 0;
         return encrypt();
     }
-    
+    //a test in paper
     uint128_t encrypt_test()
     {
         workspace.clear();
