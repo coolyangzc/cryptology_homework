@@ -181,7 +181,7 @@ public:
             len_link.set_len(A_len,C_len);
             res = (res^len_link)*H;
         }
-        cout<<"res :"<<endl;
+        cout<<"GHASH :"<<endl;
         res.print_data();
         return res;
     }
@@ -196,7 +196,9 @@ public:
         H.print_data();
         cout<<"E=\n";
         E.print_data();
-        return GHASH()^E;
+        uint128_t T = GHASH()^E;
+        cout<<"T=\n";
+        return T;
     }
     
     uint128_t encrypt(string s)
