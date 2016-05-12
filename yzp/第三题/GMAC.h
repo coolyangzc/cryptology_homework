@@ -75,6 +75,8 @@ public:
     uint128_t operator *(uint128_t &y)//this * y
     {
         uint128_t z, v(*this);
+        uint128_t R;
+        R.data[0] = 1;R.data[1] = 1;R.data[2] = 1;R.data[7] = 1;
         for(int i=0;i<128;i++)
         {
             if(y[i])
@@ -85,7 +87,7 @@ public:
             }
             else
             {
-                v = v.rightshift()^(*this);
+                v = v.rightshift()^R;
             }
         }
         return z;
@@ -103,13 +105,17 @@ public:
     }
     
     //for GHASH
-    void set_len(int len)
+    bitset<128> int_to_bit(int len)
     {
         bitset<128> inverse = len;
+        bitset<128> res;
         for(int i=0;i<128;i++)
-            data[i] = inverse[127-i];
-        print_data();
-        data = data>>64;
+            res[i] = inverse[127-i];
+        return res;
+    }
+    void set_len(int len1,int len2)
+    {
+        data = (int_to_bit(len1)>>64)^int_to_bit(len2);
         cout<<"len A|len C :"<<endl;
         print_data();
     }
@@ -133,6 +139,7 @@ public:
     uint8_t Y[16];
     
     int A_len;
+    int C_len;
     vector<uint128_t > workspace;
     
     void IV_to_Y(uint8_t* IV)
@@ -143,7 +150,7 @@ public:
     
     uint128_t GHASH()
     {
-        cout<<"temp128 :"<<endl;
+        cout<<"string to 128 :"<<endl;
         for(int i=0;i<workspace.size();i++)
         {
             workspace[i].print_data();
@@ -162,7 +169,7 @@ public:
                 res.print_data();
             }
             uint128_t len_link;
-            len_link.set_len(A_len);
+            len_link.set_len(A_len,C_len);
             res = (res^len_link)*H;
         }
         cout<<"res :"<<endl;
@@ -187,6 +194,7 @@ public:
     {
         int len = s.size();
         A_len = 8*len;
+        C_len = 0;
         workspace.clear();
         for(int i=0;i<len;i+=16)
         {
@@ -201,6 +209,40 @@ public:
     {
         workspace.clear();
         A_len = 0;
+        C_len = 0;
         return encrypt();
+    }
+    
+    uint128_t encrypt_test()
+    {
+        workspace.clear();
+        A_len = 0;
+        C_len = 128;
+        aes.expand();
+        uint128_t HH(aes.cipher(zero_plaintext));//ab a3 1e 4e cb 74 1b f0 ce 52 1d bf 7e 2d 77 f7
+        H = HH;
+        uint128_t E(aes.cipher(Y));
+        cout<<"H=\n";
+        H.print_data();
+        cout<<"E=\n";
+        E.print_data();
+        //GHASH
+        uint128_t G;
+        Y[15]++;
+        uint128_t C(aes.cipher(Y));
+        cout<<"C=\n";
+        C.print_data();
+        
+        G = (G^C)*H;
+        
+        cout<<"middle :"<<endl;
+        G.print_data();
+        
+        uint128_t len_link;
+        len_link.set_len(A_len,C_len);
+        G = (G^len_link)*H;
+        cout<<"GHASH :"<<endl;
+        G.print_data();
+        return G^E;
     }
 };

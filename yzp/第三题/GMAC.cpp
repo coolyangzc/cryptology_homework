@@ -14,6 +14,7 @@ int main()
     gmac.IV_to_Y(test_iv);
     gmac.encrypt("qiandichen2013011402");
     //gmac.encrypt_null().print_data();
+    //gmac.encrypt_test().print_data();
     
     /*uint128_t a;
     a.set_len(18);
