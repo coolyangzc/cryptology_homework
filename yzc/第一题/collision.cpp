@@ -51,8 +51,6 @@ void print_msg(unsigned int id, int len = 10)
 int main()
 {
     find_collision();
-    //print_msg(43657, 5);
-    //print_msg(389516, 6);
     //print_msg(4346771);
     return 0;
 }

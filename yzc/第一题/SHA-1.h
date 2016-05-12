@@ -6,9 +6,6 @@
 
 namespace SHA_1
 {
-    typedef unsigned int uint32_t;
-    typedef unsigned long long uint64_t;
-
     const uint32_t K[4] = {0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6};
     const uint32_t H0[5] = {0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0};
 

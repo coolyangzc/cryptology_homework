@@ -11,8 +11,9 @@ int main()
 
     for(int t=0; t<4; t++)
     {
-        cout << msg[t] << ":" << endl;
-        res = SHA_1::SHA1(msg[t], true);
+        cout << msg[t] << endl;
+        res = SHA_1::SHA1(msg[t]);
+        //res = SHA_1::SHA1(msg[t], true);
         cout << "SHA-1 : ";
         for(int i = 0; i < 5; i++)
             cout << hex << res[i];
